@@ -38,12 +38,12 @@ export class BookingService {
 
     try {
       return await this.createBookingTransaction(input.userId, input.roomId, startDate, endDate);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof HttpError) {
         throw error;
       }
 
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
+      if (error?.code === "P2034") {
         try {
           return await this.createBookingTransaction(
             input.userId,
@@ -51,11 +51,8 @@ export class BookingService {
             startDate,
             endDate
           );
-        } catch (retryError) {
-          if (
-            retryError instanceof Prisma.PrismaClientKnownRequestError &&
-            retryError.code === "P2034"
-          ) {
+        } catch (retryError: any) {
+          if (retryError?.code === "P2034") {
             throw new HttpError("Booking conflicted with another request, please retry", 409);
           }
 

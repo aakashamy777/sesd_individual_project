@@ -10,7 +10,7 @@ interface CreateReviewInput {
 }
 
 export class ReviewService {
-  constructor(private readonly reviewRepository: ReviewRepository) {}
+  constructor(private readonly reviewRepository: ReviewRepository) { }
 
   public async createReview(input: CreateReviewInput) {
     const comment = input.comment.trim();
@@ -43,8 +43,8 @@ export class ReviewService {
         userId: review.userId,
         createdAt: review.createdAt
       };
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    } catch (error: any) {
+      if (error?.code === "P2002") {
         throw new HttpError("You have already reviewed this hotel", 409);
       }
 
