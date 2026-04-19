@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      UserRole  @default(CUSTOMER)
+  bookings  Booking[]
+  reviews   Review[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Hotel {
+  id          String    @id @default(uuid())
+  name        String
+  city        String
+  address     String
+  description String?
+  rooms       Room[]
+  reviews     Review[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Room {
+  id        String    @id @default(uuid())
+  type      String
+  capacity  Int
+  price     Decimal   @db.Decimal(10, 2)
+  hotelId   String
+  hotel     Hotel     @relation(fields: [hotelId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([hotelId])
+}
+
+model Booking {
+  id        String        @id @default(uuid())
+  startDate DateTime
+  endDate   DateTime
+  totalPrice Decimal      @db.Decimal(10, 2)
+  status    BookingStatus @default(CONFIRMED)
+  userId    String
+  roomId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  room      Room          @relation(fields: [roomId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([roomId, startDate, endDate])
+}
+
+model Review {
+  id        String    @id @default(uuid())
+  rating    Int
+  comment   String?
+  userId    String
+  hotelId   String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  hotel     Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([hotelId])
+  @@index([userId])
+  @@unique([userId, hotelId])
+}
