@@ -9,6 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+    res.send("StaySync Backend is Live and Running!");
+});
+
 app.get("/test", (req, res) => {
     res.json({ message: "Backend is running!", time: new Date().toISOString() });
 });
